@@ -8,6 +8,25 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(R.layout.activity_main) {
     override fun init() {
-        showLoadingDialog()
+        showLoading(true)
+
+        binding.apply{
+            vm = viewModel
+        }
+
+        viewModel.apply {
+            isLoading eventObserve { showLoading(it) }
+            toastEvent eventObserve {showToast(it)}
+
+            fetchPocketInfo()
+        }
+    }
+
+    fun showLoading(isShow: Boolean) {
+        if (isShow) {
+            showLoadingDialog()
+        } else {
+            hideLoadingDialog()
+        }
     }
 }

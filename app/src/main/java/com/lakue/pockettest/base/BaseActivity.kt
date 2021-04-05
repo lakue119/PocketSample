@@ -7,10 +7,13 @@ import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelLazy
 import com.lakue.pockettest.OnThrottleClickListener
 import com.lakue.pockettest.PocketApplication
+import com.lakue.pockettest.utils.Event
+import com.lakue.pockettest.utils.LogUtil
 import io.reactivex.disposables.CompositeDisposable
 import java.lang.reflect.ParameterizedType
 
@@ -20,6 +23,7 @@ abstract class BaseActivity<B : ViewDataBinding, VM : ViewModel>(
 
     var mToast: Toast? = null
     var isShowToast = false
+    private var sendTime: Long = 0
 
     lateinit var binding: B
 
@@ -51,8 +55,14 @@ abstract class BaseActivity<B : ViewDataBinding, VM : ViewModel>(
     }
 
     protected fun showToast(msg: String?) {
-        Toast.makeText(this, msg, Toast.LENGTH_LONG)
+        if (mToast == null) {
+            mToast = Toast.makeText(this, msg, Toast.LENGTH_LONG);
+        } else {
+            mToast!!.setText(msg);
+        }
+        mToast!!.show()
     }
+
 
     protected fun View.onThrottleClick(action: (v: View) -> Unit) {
         val listener = View.OnClickListener { action(it) }
@@ -65,5 +75,11 @@ abstract class BaseActivity<B : ViewDataBinding, VM : ViewModel>(
 
     fun hideLoadingDialog(){
         PocketApplication.getInstance().hideLoading()
+    }
+
+    protected infix fun <T> LiveData<Event<T>>.eventObserve(action: (T) -> Unit) {
+        observe(this@BaseActivity) {
+            it.get(action)
+        }
     }
 }
