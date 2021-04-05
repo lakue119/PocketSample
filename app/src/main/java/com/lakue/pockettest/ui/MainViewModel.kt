@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lakue.pockettest.model.ResponsePocket
+import com.lakue.pockettest.model.ResultPocket
 import com.lakue.pockettest.repository.PocketRepository
 import com.lakue.pockettest.utils.Event
 import com.lakue.pockettest.utils.NetworkHelper
@@ -12,7 +13,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.max
-import kotlin.math.min
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
@@ -22,27 +22,33 @@ class MainViewModel @Inject constructor(
 
     val LIMIT_COUNT = 30
 
+    //포켓몬 데이터
     private val _livePocketInfo = MutableLiveData<ArrayList<ResponsePocket>>()
     val livePocketInfo: LiveData<ArrayList<ResponsePocket>> = _livePocketInfo
+    val listPocketInfo = ArrayList<ResultPocket>()
 
+    //마지막 페이징 Boolean
     private val _isFinish = MutableLiveData<Boolean>(false)
     val isFinish: LiveData<Boolean> get() = _isFinish
 
+    //Activity Event전달 - Toast
     private val _toastEvent = MutableLiveData<Event<String>>()
     val toastEvent: LiveData<Event<String>> = _toastEvent
 
+    //Activity Event전달 - Loading
     private val _isLoading = MutableLiveData<Event<Boolean>>()
     val isLoading: LiveData<Event<Boolean>> = _isLoading
 
     val adapter = MainAdapter(this)
 
+    //BottomCatch Event - 마지막 Item개수
     val rvBottomCatch: Function1<Int, Unit> = this::onBottomCatch
 
     private var rvloading = false
 
     //RecyclerView Bottom Catch
-    fun onBottomCatch(aa: Int) {
-        if(!rvloading && aa >= adapter.itemCount - 2){
+    fun onBottomCatch(lastPositionCount: Int) {
+        if(!rvloading && lastPositionCount >= adapter.itemCount - 2){
             rvloading = true
             fetchPocketInfo()
         }
@@ -63,6 +69,7 @@ class MainViewModel @Inject constructor(
                             _isFinish.value = true
                         }
                         adapter.addItems(ArrayList(data.results))
+                        listPocketInfo.addAll(ArrayList(data.results))
                     } else {
                         //Api Fail
                         _toastEvent.value = Event("API 호출에 실패했습니다.")
