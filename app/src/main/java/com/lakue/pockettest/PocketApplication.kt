@@ -5,11 +5,12 @@ import android.app.Application
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import androidx.appcompat.app.AppCompatDialog
+import com.lakue.pockettest.base.BaseApplication
 import com.lakue.pockettest.utils.BaseUtils.init
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class PocketApplication : Application() {
+open class PocketApplication : BaseApplication() {
 
     var progressDialog: AppCompatDialog? = null
 

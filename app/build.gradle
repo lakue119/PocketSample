@@ -54,6 +54,9 @@ android {
             buildConfigField "String", "BASE_URL", '"https://pokeapi.co"'
         }
     }
+    hilt {
+        enableTransformForLocalTests = true
+    }
 }
 
 dependencies {
@@ -68,8 +71,16 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
     implementation "org.mockito:mockito-core:2.23.0"
+    testImplementation 'org.mockito:mockito-inline:2.13.0'
+    androidTestImplementation 'org.mockito:mockito-android:2.28.2'
     testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0'
     testImplementation 'androidx.arch.core:core-testing:2.1.0'
+    androidTestImplementation "android.arch.core:core-testing:1.1.1"
+
+    testImplementation 'org.powermock:powermock-core:1.7.4'
+    testImplementation 'org.powermock:powermock-module-testng:1.7.4'
+    testImplementation 'org.powermock:powermock-api-mockito2:1.7.4'
+
 
     def lifecycle_version = "2.3.1"
     // ViewModel
@@ -94,6 +105,13 @@ dependencies {
     kapt "com.google.dagger:hilt-compiler:2.32-alpha"
     implementation 'androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03'
     kapt 'androidx.hilt:hilt-compiler:1.0.0-beta01'
+
+    // For Robolectric tests.
+    testImplementation 'com.google.dagger:hilt-android-testing:2.28-alpha'
+    kaptTest 'com.google.dagger:hilt-android-compiler:2.28-alpha'
+
+    androidTestImplementation 'com.google.dagger:hilt-android-testing:2.28-alpha'
+    kaptAndroidTest 'com.google.dagger:hilt-android-compiler:2.28-alpha'
 
     //RxJava
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
