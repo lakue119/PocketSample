@@ -8,6 +8,7 @@ import com.lakue.pockettest.model.ResponsePocket
 import com.lakue.pockettest.model.ResultPocket
 import com.lakue.pockettest.repository.PocketRepository
 import com.lakue.pockettest.utils.Event
+import com.lakue.pockettest.utils.LogUtil
 import com.lakue.pockettest.utils.NetworkHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -23,8 +24,8 @@ class MainViewModel @Inject constructor(
     val LIMIT_COUNT = 30
 
     //포켓몬 데이터
-    private val _livePocketInfo = MutableLiveData<ArrayList<ResponsePocket>>()
-    val livePocketInfo: LiveData<ArrayList<ResponsePocket>> = _livePocketInfo
+    private val _livePocketInfo = MutableLiveData<ArrayList<ResultPocket>>()
+    val livePocketInfo: LiveData<ArrayList<ResultPocket>> = _livePocketInfo
     val listPocketInfo = ArrayList<ResultPocket>()
 
     //마지막 페이징 Boolean
@@ -44,7 +45,11 @@ class MainViewModel @Inject constructor(
     //BottomCatch Event - 마지막 Item개수
     val rvBottomCatch: Function1<Int, Unit> = this::onBottomCatch
 
+    //TextChagne Event - keyword change
+    val etTextChange: Function1<String, Unit> = this::onEditorTextChange
+
     private var rvloading = false
+    private var keyword = ""
 
     //RecyclerView Bottom Catch
     fun onBottomCatch(lastPositionCount: Int) {
@@ -52,6 +57,21 @@ class MainViewModel @Inject constructor(
             rvloading = true
             fetchPocketInfo()
         }
+    }
+
+    //RecyclerView Bottom Catch
+    fun onEditorTextChange(keyword: String) {
+        this.keyword = keyword
+        adapter.itemClear()
+        if(keyword.isEmpty()){
+            rvloading = false
+            adapter.addItems(ArrayList(listPocketInfo), true)
+        } else {
+            var searchList = listPocketInfo.filter { it.name.contains(keyword) }
+            rvloading = true
+            adapter.addItems(ArrayList(searchList), false)
+        }
+        adapter.setKeyword(keyword)
     }
 
     fun fetchPocketInfo(){
@@ -68,7 +88,7 @@ class MainViewModel @Inject constructor(
                         if(data.next == null){
                             _isFinish.value = true
                         }
-                        adapter.addItems(ArrayList(data.results))
+                        adapter.addItems(ArrayList(data.results), true)
                         listPocketInfo.addAll(ArrayList(data.results))
                     } else {
                         //Api Fail

@@ -31,7 +31,7 @@ class MainAdapter(val viewModel: MainViewModel) : BaseAdapter() {
         notifyDataSetChanged()
     }
 
-    fun addItems(items: ArrayList<ResultPocket>) {
+    fun addItems(items: ArrayList<ResultPocket>, isLoading: Boolean) {
         val pos = pocketList.size
 
         if (viewModel.isFinish.value!!) {
@@ -45,7 +45,9 @@ class MainAdapter(val viewModel: MainViewModel) : BaseAdapter() {
                 notifyItemRemoved(pocketList.size )
             }
             pocketList.addAll(items)
-            pocketList.add(true)
+            if(isLoading){
+                pocketList.add(true)
+            }
         }
         notifyItemRangeInserted(pos, pocketList.size - 1)
 
