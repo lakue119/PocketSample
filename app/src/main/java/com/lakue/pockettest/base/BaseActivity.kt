@@ -55,12 +55,13 @@ abstract class BaseActivity<B : ViewDataBinding, VM : ViewModel>(
     }
 
     protected fun showToast(msg: String?) {
-        if (mToast == null) {
-            mToast = Toast.makeText(this, msg, Toast.LENGTH_LONG);
-        } else {
-            mToast!!.setText(msg);
-        }
-        mToast!!.show()
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+//        if (mToast == null) {
+//            mToast = Toast.makeText(this, msg, Toast.LENGTH_LONG);
+//        } else {
+//            mToast!!.setText(msg);
+//        }
+//        mToast!!.show()
     }
 
 

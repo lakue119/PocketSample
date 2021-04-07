@@ -4,11 +4,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lakue.pockettest.model.ResponsePocket
+import androidx.recyclerview.widget.RecyclerView
 import com.lakue.pockettest.model.ResultPocket
 import com.lakue.pockettest.repository.PocketRepository
 import com.lakue.pockettest.utils.Event
-import com.lakue.pockettest.utils.LogUtil
 import com.lakue.pockettest.utils.NetworkHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -29,8 +28,12 @@ class MainViewModel @Inject constructor(
     val listPocketInfo = ArrayList<ResultPocket>()
 
     //마지막 페이징 Boolean
-    private val _isFinish = MutableLiveData<Boolean>(false)
-    val isFinish: LiveData<Boolean> get() = _isFinish
+    private val _liveIsFinish = MutableLiveData<Boolean>(false)
+    val liveIsFinish: LiveData<Boolean> get() = _liveIsFinish
+
+    //마지막 페이징 Boolean
+    private val _liveIsEmpty = MutableLiveData<Boolean>(true)
+    val liveIsEmpty: LiveData<Boolean> get() = _liveIsEmpty
 
     //Activity Event전달 - Toast
     private val _toastEvent = MutableLiveData<Event<String>>()
@@ -51,6 +54,44 @@ class MainViewModel @Inject constructor(
     private var rvloading = false
     private var keyword = ""
 
+    init {
+        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onChanged() {
+                super.onChanged()
+                checkEmpty()
+            }
+
+            override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+                super.onItemRangeRemoved(positionStart, itemCount)
+                checkEmpty()
+            }
+
+            override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
+                super.onItemRangeMoved(fromPosition, toPosition, itemCount)
+                checkEmpty()
+            }
+
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                super.onItemRangeInserted(positionStart, itemCount)
+                checkEmpty()
+            }
+
+            override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
+                super.onItemRangeChanged(positionStart, itemCount)
+                checkEmpty()
+            }
+
+            override fun onItemRangeChanged(positionStart: Int, itemCount: Int, payload: Any?) {
+                super.onItemRangeChanged(positionStart, itemCount, payload)
+                checkEmpty()
+            }
+
+            fun checkEmpty() {
+                _liveIsEmpty.postValue(adapter.itemCount == 0)
+            }
+        })
+    }
+
     //RecyclerView Bottom Catch
     fun onBottomCatch(lastPositionCount: Int) {
         if(!rvloading && lastPositionCount >= adapter.itemCount - 2){
@@ -59,7 +100,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    //RecyclerView Bottom Catch
+    //EditText TextChange - get Keyword
     fun onEditorTextChange(keyword: String) {
         this.keyword = keyword
         adapter.itemClear()
@@ -74,19 +115,19 @@ class MainViewModel @Inject constructor(
         adapter.setKeyword(keyword)
     }
 
-    fun fetchPocketInfo(){
+    fun fetchPocketInfo(limit:Int = LIMIT_COUNT, offset:Int = max(0,adapter.itemCount-1)){
         viewModelScope.launch {
             if (networkHelper.isNetworkConnected()) {
                 //네트워크 연결
                 pocketRepository.getPocketInfo(
-                    LIMIT_COUNT,
-                    max(0,adapter.itemCount-1)
+                    limit,
+                    offset
                 ).let { reponseSearch ->
                     if (reponseSearch.isSuccessful) {
                         //API Success
                         val data = reponseSearch.body()!!
                         if(data.next == null){
-                            _isFinish.value = true
+                            _liveIsFinish.value = true
                         }
                         adapter.addItems(ArrayList(data.results), true)
                         listPocketInfo.addAll(ArrayList(data.results))

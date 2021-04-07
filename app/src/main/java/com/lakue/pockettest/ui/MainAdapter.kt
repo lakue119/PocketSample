@@ -34,7 +34,7 @@ class MainAdapter(val viewModel: MainViewModel) : BaseAdapter() {
     fun addItems(items: ArrayList<ResultPocket>, isLoading: Boolean) {
         val pos = pocketList.size
 
-        if (viewModel.isFinish.value!!) {
+        if (viewModel.liveIsFinish.value!!) {
             //마지막 페이지 호출 시 아이템만 로드
             pocketList.addAll(items)
         } else {
