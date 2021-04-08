@@ -117,8 +117,7 @@ class MainViewModel @Inject constructor(
 
     fun fetchPocketInfo(limit:Int = LIMIT_COUNT, offset:Int = max(0,adapter.itemCount-1)){
         viewModelScope.launch {
-            if (networkHelper.isNetworkConnected()) {
-                //네트워크 연결
+            if(networkCheck()){
                 pocketRepository.getPocketInfo(
                     limit,
                     offset
@@ -135,15 +134,24 @@ class MainViewModel @Inject constructor(
                         //Api Fail
                         _toastEvent.value = Event("API 호출에 실패했습니다.")
                     }
+
+                    rvloading = false
+                    _isLoading.value = Event(false)
                 }
-                rvloading = false
-                _isLoading.value = Event(false)
-            } else {
-                //네트워크 연결 실패
-                _toastEvent.value = Event("네트워크 연결을 확인해주세요.")
-                rvloading = false
-                _isLoading.value = Event(false)
             }
+        }
+    }
+
+    fun networkCheck(): Boolean{
+        return if (networkHelper.isNetworkConnected()) {
+            //네트워크 연결
+            true
+        } else {
+            //네트워크 연결 실패
+            _toastEvent.value = Event("네트워크 연결을 확인해주세요.")
+            rvloading = false
+            _isLoading.value = Event(false)
+            false
         }
     }
 

@@ -10,7 +10,7 @@ import com.lakue.pockettest.utils.BaseUtils.init
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-open class PocketApplication : BaseApplication() {
+class PocketApplication : BaseApplication() {
 
     var progressDialog: AppCompatDialog? = null
 

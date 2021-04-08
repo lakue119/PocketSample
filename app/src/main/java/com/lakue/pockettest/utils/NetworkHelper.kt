@@ -11,7 +11,7 @@ import javax.inject.Singleton
 @Singleton
 open class NetworkHelper @Inject constructor(@ApplicationContext private val context: Context) {
 
-    fun isNetworkConnected(): Boolean {
+    open fun isNetworkConnected(): Boolean {
         var result = false
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
